@@ -20,7 +20,7 @@ def decode_execution_plan_item(credential_dict):
 
 
 def authenticate_credential(
-    credential: Credential, proxy: str, insecure: bool = False
+    credential: Credential, proxy: str, url: str, insecure: bool = False
 ) -> AuthResult:
     proxies = None
     if proxy:
@@ -31,15 +31,17 @@ def authenticate_credential(
     if insecure:
         auth_app = PublicClientApplication(
             credential.client_id[1],
-            authority="https://login.microsoftonline.com/organizations",
+            authority="https://" + url + "/organizations",
             proxies=proxies,
             verify=False,
+            validate_authority=False, # Added for custom URL
         )
     else:
         auth_app = PublicClientApplication(
             credential.client_id[1],
-            authority="https://login.microsoftonline.com/organizations",
+            authority="https://" + url + "/organizations",
             proxies=proxies,
+            validate_authority=False, # Added for custom URL
         )
 
     if credential.user_agent:

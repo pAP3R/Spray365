@@ -59,6 +59,15 @@ auth_results: list[AuthResult] = []
     default=False,
     show_default=True,
 )
+@click.option(
+    "--url",
+    "-u",
+    metavar="",
+    type=str,
+    help="Target URL to use. For use with Fireprox or other \"non-proxy\" targets.",
+    default="login.microsoftonline.com",
+    show_default=True,
+)
 @optgroup.group("Proxy options", cls=AllOptionGroup)
 @optgroup.option(
     "--proxy",
@@ -77,7 +86,7 @@ auth_results: list[AuthResult] = []
     show_default=True,
 )
 def command(
-    execution_plan: click.File, lockout, resume_index, ignore_success, proxy, insecure
+    execution_plan: click.File, lockout, resume_index, ignore_success, proxy, url, insecure
 ):
     console.print_info("Processing execution plan '%s'" % execution_plan.name)
 
@@ -141,6 +150,9 @@ def command(
     if proxy:
         console.print_info("Proxy (HTTP/HTTPS) set to '%s'" % proxy)
 
+    if url:
+        console.print_info("URL set to '%s'" % url)
+
     console.print_info("Starting to spray credentials")
 
     spray_size = len(credentials)
@@ -156,7 +168,7 @@ def command(
         if ignore_success or cred.username not in credentialed_users:
             _print_credential_authentication_output(cred, (spray_idx, spray_size))
             time.sleep(cred.initial_delay)
-            auth_result = helpers.authenticate_credential(cred, proxy, insecure)
+            auth_result = helpers.authenticate_credential(cred, proxy, url, insecure)
             _print_credential_authentication_output(
                 cred, (spray_idx, spray_size), auth_result
             )
